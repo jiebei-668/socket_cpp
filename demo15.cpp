@@ -1,7 +1,7 @@
 /*****************************************************************************
- * 程序名：demo03.cpp
+ * 程序名：demo15.cpp
  * 作者：jiebei
- * 功能：这是一个多线程网络通信服务端，它接受客户端连接后将接受到的来自客户端的消息原封不动发送回去。信号2（Ctrl-c）或信号15可以终止该程序
+ * 功能：这是一个多线程多poll网络通信服务端，它接受客户端连接后将接受到的来自客户端的消息原封不动发送回去。信号2（Ctrl-c）或信号15可以终止该程序。程序有THREAD_NUMS个通信线程，每个通信线程跑一个poll，一个主线程负责接收新的连接。
  ***************************************************************************/
 #include <stdio.h>
 #include <vector>
@@ -141,7 +141,8 @@ void exit_fun(int sig)
 	}
 	pthread_mutex_unlock(&mutex);
 	// 这里的sleep为了使通信线程有充分时间做善后工作
-	sleep(20);
+	sleep(5);
+	pthread_mutex_destroy(&mutex);
 
 	// 用于测试线程是否有序退出，互斥锁是否成功	
 	/*
@@ -171,7 +172,6 @@ void thmain_cleanup(void *arg)
 	pp->pid = 0;
 	pthread_t thid = pthread_self();
 	printf("通信子线程[%ld]退出。。。\n", pthread_self());
-	pthread_exit(NULL);
 }
 void *pollmain(void *arg)
 {
@@ -258,4 +258,5 @@ void *pollmain(void *arg)
 		}
 	}
 	pthread_cleanup_pop(1);
+	return nullptr;
 }
